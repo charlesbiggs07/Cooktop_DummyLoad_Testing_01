@@ -1,0 +1,11 @@
+// Fault Codes
+
+#define SHUTDOWN_OVERTEMP         "Overtemperature"
+#define SHUTDOWN_BUS_VOLTAGE_LOW  "Bus Voltage Low"
+#define SHUTDOWN_BUS_VOLTAGE_HIGH "Bus Voltage High"
+#define SHUTDOWN_VGS_HIGH         "Vgs Too High"
+#define SHUTDOWN_SHUNT_FAULT      "Shunt Voltage Abnormal"
+#define SHUTDOWN_THERM_FAULT      "Thermistor Fault"
+#define SHUTDOWN_INA_FAIL         "INA219 Comm Fail"
+#define SHUTDOWN_USER_COMMAND     "User Command"
+#define SHUTDOWN_STARTUP_FAIL     "Startup Check Fail"

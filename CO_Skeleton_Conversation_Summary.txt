@@ -1,0 +1,22 @@
+Conversation Summary – INA219 Calibration and CO_Skeleton Updates
+Date: March 27, 2025
+
+1. User asked how to calibrate the INA219 current sensor.
+2. Explained calibration using a 50A / 75mV shunt (0.0015 ohms), choosing a Current_LSB of 1.5mA.
+3. Calculated the calibration register value as 18204 for full-scale range up to 50A.
+4. User requested help updating their Arduino code (CO_Skeleton_02.cpp) to use the calibration value.
+5. Implemented the following updates in CO_Skeleton_03.cpp:
+   - Defined REG_CALIBRATION and REG_CURRENT.
+   - Added writeCalibration() function and called it in setup().
+   - Rewrote readCurrent() to use the INA219’s current register with scaling.
+6. User requested to add power measurement functionality.
+7. Implemented the following in CO_Skeleton_03_Power.cpp:
+   - Defined REG_POWER.
+   - Added readPower() function using a Power_LSB of 0.03W/bit.
+   - Appended power to the serial print output.
+8. User requested the output be converted to CSV format.
+9. Modified the serial output in loop() to print values separated by commas.
+10. Delivered the final file as CO_Skeleton_03_CSV.cpp.
+
+All modifications were made carefully to preserve functionality while enhancing precision and data recording.
+

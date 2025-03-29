@@ -1,0 +1,63 @@
+**Coordinator (CO) Attributes**
+
+The Coordinator (CO) is an Arduino Nano responsible for overseeing and managing system control, communication, and startup verification.
+
+---
+
+**Core Responsibilities:**
+- Drives the system control logic.
+- Interfaces with the INA219 current sensor via I2C, using an ISO1540 I2C isolator.
+- Reads thermistor data to monitor plate temperature.
+- Controls the system relay and fan (only with Watchdog permission).
+- Communicates serially with the PC (for data logging) and with the Watchdog via GPIO and optional serial.
+- Issues system state via a dedicated GPIO to Watchdog.
+
+---
+
+**Startup Behavior (setup):**
+1. Set all pin modes and default states.
+2. Begin serial communication.
+3. Initialize I2C (INA219 communication).
+4. Perform safety tests:
+   - Fan test (turn ON fan, ensure temp does not rise).
+   - Relay test (ensure bus voltage is present).
+   - Confirm INA219 is communicating.
+   - Verify reasonable thermistor reading.
+5. After passing tests, raise GPIO signal to WD indicating "ready."
+
+---
+
+**Runtime Responsibilities (loop):**
+- Monitor current and temperature.
+- Format and send serial data stream to PC.
+- Send shutdown or emergency commands to WD as needed:
+  - "SHUTDOWN\n" for controlled stop.
+  - "ALL STOP\n" for emergency shutdown.
+- Accept override of fan and relay control by WD.
+- Optionally process status or interrupt signal from WD.
+
+---
+
+**Pin Usage:**
+- A0: Thermistor analog input.
+- SDA/SCL: I2C bus to INA219.
+- D5: Relay control (active HIGH) — only with WD permission.
+- D7: Fan control (active LOW) — only with WD permission.
+- D3: Status output to WD (HIGH = "I'm alive").
+- D2: Interrupt input from WD (emergency stop triggered by WD).
+
+---
+
+**Communication Notes:**
+- Serial.print() stream includes Vgs, current, shunt_mV, plate temperature, and PWM.
+- WD does not respond via I2C or UART but may trigger an interrupt via D2.
+- CO must handle emergency shutdown immediately if interrupted.
+
+---
+
+**Failsafe Behavior:**
+- If D2 interrupt is triggered by WD, CO enters emergency shutdown.
+- CO will maintain fan ON after shutdown until temperature drops below threshold.
+- Relay remains OFF during and after shutdown.
+- CO continues serial output for diagnostics after shutdown.
+

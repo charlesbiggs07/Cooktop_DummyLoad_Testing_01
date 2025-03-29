@@ -1,0 +1,52 @@
+**CO Sketch Development Summary – March 27, 2025**
+
+---
+
+**Objective:**
+Develop an Arduino Nano sketch for the "Coordinator" (CO) based on the system description file `CO_Attributes_01.txt`, adhering strictly to `Wire.h` (no Adafruit libraries) for INA219 communication.
+
+---
+
+**Key Elements of the CO Sketch:**
+- **Pin Setup:**
+  - A0: Thermistor analog input
+  - D5: Relay control (active HIGH)
+  - D7: Fan control (active LOW)
+  - D3: CO status signal to Watchdog (HIGH = alive)
+  - D2: Interrupt input from Watchdog
+
+- **Startup Tests Performed in setup():**
+  1. Turn fan ON and ensure temperature does not rise excessively.
+  2. Turn relay ON (briefly) and verify INA219 bus voltage is within expected range.
+  3. Read INA219 shunt voltage to ensure no current is flowing.
+  4. Check thermistor reading to ensure it's within a sane temperature range.
+  5. Set D3 HIGH to signal the Watchdog that CO is alive and ready.
+
+- **Emergency Shutdown:**
+  - Triggered either by D2 interrupt (FALLING) or by logic within `loop()`.
+  - Powers OFF relay, turns ON fan, and outputs `ALL STOP` via Serial.
+
+- **Loop Behavior:**
+  - Reads and reports Vgs, current, shunt voltage (in mV), plate temperature, and PWM.
+  - Continues reporting even after shutdown, per system description.
+
+- **INA219 Access:**
+  - Uses raw register access via `Wire.h` only.
+  - `Wire.requestFrom()` calls explicitly cast to `uint8_t` to resolve ambiguous overload errors during compile.
+
+---
+
+**Compiler Issue Resolved:**
+- Original compilation failed due to `requestFrom()` overload ambiguity.
+- Fixed by casting both parameters to `uint8_t` in the two Wire read functions:
+  ```cpp
+  Wire.requestFrom((uint8_t)INA219_ADDR, (uint8_t)2);
+  ```
+
+---
+
+**Final Result:**
+- Sketch named `CO_Sketch_01` successfully compiled.
+- Emergency interrupt and sensor tests functional.
+- Ready for deployment and future feature integration (Vgs and PWM reads, improved shutdown logic, etc.).
+

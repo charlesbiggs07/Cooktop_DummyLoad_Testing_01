@@ -1,0 +1,47 @@
+Here’s an overview of the main features in **CO_Skeleton_03_CSV.cpp**:
+
+1. **I²C (Wire) Communications with INA219**  
+   - Reads **bus voltage**, **shunt voltage**, **current**, and **power** via the INA219 sensor.  
+   - Performs a calibration write to the INA219 in `writeCalibration()` at startup.  
+   - Each sensor value has its own function (`readBusVoltage()`, `readShuntVoltage()`, `readCurrent()`, and `readPower()`).
+
+2. **Thermistor Temperature Measurement**  
+   - Uses an analog input (`THERMISTOR_PIN = A0`) to read temperature.  
+   - Converts the ADC reading to a **resistance** value and applies a **Steinhart–Hart** approximation to get the temperature in **Fahrenheit**.
+
+3. **Relay and Fan Control**  
+   - Controls a **relay** on pin 5 (active high) and a **fan** on pin 7 (active low).  
+   - By default, the relay is initially off, and the fan is off in the final operational state, but turned on briefly during safety checks.  
+   - If a shutdown is triggered (emergency or otherwise), the relay is switched off (LOW), and the fan is turned on (LOW, since it’s active low).
+
+4. **Startup Safety Checks**  
+   - After turning the fan on briefly, the sketch measures:  
+     - Temperature (must be < 150 °F to proceed).  
+     - Bus voltage (must be between 10 V and 15 V).  
+     - Shunt voltage (must be within ±0.1 V).  
+     - Temperature again (now must be between 32 °F and 180 °F).  
+   - If any check is out of range, an **emergency shutdown** is triggered before normal operation continues.
+
+5. **Watchdog Interrupt**  
+   - A hardware **watchdog interrupt** line is on pin 2, triggering on **FALLING**.  
+   - If triggered, it sets a flag that leads to an **emergency shutdown** (turning on fan, turning off relay, and printing “ALL STOP”).
+
+6. **Status Pin Indicator**  
+   - Uses pin 3 as a “status” indicator for the **watchdog** (HIGH = system alive).  
+   - Initially set LOW during setup and switched to HIGH after successful startup checks.
+
+7. **Emergency Shutdown Mechanism**  
+   - A single function `emergencyShutdown()` sets **relay OFF**, **fan ON**, and prints "ALL STOP" over serial.  
+   - Uses a `shutdownState` flag to avoid repeating the shutdown sequence.
+
+8. **CSV-Style Serial Logging**  
+   - The `loop()` function runs repeatedly, printing data values in a single comma-separated line:  
+     1. `vgs` (placeholder voltage)  
+     2. `current` (INA219)  
+     3. `shunt_mV`  
+     4. `tempF` (thermistor temperature in °F)  
+     5. `readPower()` (INA219 power)  
+     6. `pwmVal` (placeholder)  
+   - The code prints these values every 500 ms, enabling **periodic data logging**.
+
+Overall, this sketch is designed to perform **coordinator** tasks on an Arduino, including sensor readouts (INA219 + thermistor), initial safety checks, watchdog handling, and real-time CSV output for monitoring system parameters.
